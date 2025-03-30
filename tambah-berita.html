@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Berita</title>
+</head>
+<body>
+    <h1>Tambah Berita</h1>
+    <form>
+        <input type="text" id="judulBerita" placeholder="Judul Berita"><br><br>
+        <textarea id="isiBerita" placeholder="Isi Berita"></textarea><br><br>
+        <button type="button" id="submitBerita">Kirim</button>
+    </form>
+
+    <script type="module">
+        // Impor Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDn1OF9HxmJVS_Bj3eOPL3brTUw_YixVZo",
+            authDomain: "huskay-news.firebaseapp.com",
+            projectId: "huskay-news",
+            storageBucket: "huskay-news.firebasestorage.app",
+            messagingSenderId: "675892308818",
+            appId: "1:675892308818:web:199b452f50a4888b08688b",
+            measurementId: "G-PPE5YWJPM9"
+        };
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Fungsi untuk mengirim berita ke Firestore
+        document.getElementById("submitBerita").addEventListener("click", async () => {
+            const judul = document.getElementById("judulBerita").value;
+            const isi = document.getElementById("isiBerita").value;
+
+            if (judul && isi) {
+                try {
+                    await addDoc(collection(db, "berita"), {
+                        judul: judul,
+                        isi: isi,
+                        timestamp: new Date()
+                    });
+                    alert("Berita berhasil dikirim!");
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("Gagal mengirim berita.");
+                }
+            } else {
+                alert("Harap isi semua kolom!");
+            }
+        });
+    </script>
+    <script type="module">
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                alert("Anda harus login terlebih dahulu!");
+                window.location.href = "login.html"; // Arahkan ke halaman login
+            }
+        });
+    </script>
+    
+</body>
+</html>
