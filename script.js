@@ -35,6 +35,9 @@
         button:hover {
             background: #0056b3;
         }
+        #tambahBeritaButton {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -44,13 +47,14 @@
         <form>
             <input type="text" id="judulBerita" placeholder="Judul Berita">
             <textarea id="isiBerita" placeholder="Isi Berita"></textarea>
-            <button type="button" id="submitBerita">Kirim</button>
+            <button type="button" id="tambahBeritaButton">Kirim</button>
         </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDn1OF9HxmJVS_Bj3eOPL3brTUw_YixVZo",
@@ -64,6 +68,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth();
 
         async function tambahBerita(judul, isi) {
             try {
@@ -80,7 +85,7 @@
             }
         }
 
-        document.getElementById("submitBerita").addEventListener("click", function() {
+        document.getElementById("tambahBeritaButton").addEventListener("click", function() {
             let judul = document.getElementById("judulBerita").value.trim();
             let isi = document.getElementById("isiBerita").value.trim();
             
@@ -91,20 +96,23 @@
 
             tambahBerita(judul, isi);
         });
-    </script>
-    firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        const userRef = firebase.firestore().collection("users").doc(user.uid);
-        userRef.get().then((doc) => {
-            if (doc.exists && doc.data().role === "admin") {
-                document.getElementById("tambahBeritaButton").style.display = "block";
-            } else {
-                document.getElementById("tambahBeritaButton").style.display = "none";
-                alert("Hanya admin yang bisa menambahkan berita!");
+
+        // Cek apakah user adalah admin sebelum menampilkan tombol
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+                const userRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists() && userDoc.data().role === "admin") {
+                    document.getElementById("tambahBeritaButton").style.display = "block";
+                } else {
+                    document.getElementById("tambahBeritaButton").style.display = "none";
+                    alert("Hanya admin yang bisa menambahkan berita!");
+                }
             }
         });
-    }
-});
+    </script>
 
 </body>
 </html>
